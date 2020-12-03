@@ -2,7 +2,6 @@ import java.util.Scanner;
 
 public class TicTacToe
 {
-  // declare instance variables below
   Scanner scanner;
   char[][] board = new char[9][9];
   char[][] ultimateBoard = new char[3][3];
@@ -12,7 +11,7 @@ public class TicTacToe
   int nextRowUB = 8; //upperbound of valid row for next player's move
   int nextColLB = 0; //lowerbound of valid col for next player's move
   int nextColUB = 8; //upperbound of valid col for next player's move
-  int r; int c; int ultRow; int ultCol;
+  int r; int c; int ultRow = -1; int ultCol = -1;
   int numOfFilledSquares = 0;
   int filledSpots[][] = new int[3][3]; //number of filled spots for each smaller grid
 
@@ -78,9 +77,17 @@ public class TicTacToe
       System.out.println("Tie!");
       return true;
     }
+    //ultimate row and col for next legal move
+    if (ultRow > 0) {
+      System.out.println("ultimate row: " + ultRow);
+      System.out.println("ultimate col: " + ultCol);
+    }
     //input
     boolean valid = false;
     while (!valid) {
+      System.out.print("Player " + playerNum + ": ");
+      if (playerNum == 1) System.out.println("x");
+      else System.out.println("o");
      //input for row
      System.out.println("Enter row: ");
      r = -1;
@@ -90,7 +97,7 @@ public class TicTacToe
      System.out.println(r);
 
      //input for column
-     System.out.println("Player " + playerNum + ", enter a number between " + nextColLB + " and " + nextColUB + " to be the column number for your move:");
+     System.out.println("Enter column: ");
      c = -1;
      while (c == -1){
        c = validateInput();
@@ -99,6 +106,8 @@ public class TicTacToe
 
      valid = isValidMove(r, c);
     }
+    ultRow = r / 3;
+    ultCol = c / 3;
     playerMove();
     boolean win = checkWin();
     printGameGrid();
@@ -185,7 +194,6 @@ public class TicTacToe
     }
 
     //check vertical win
-    int ultRow = r / 3;
     int rowWins = 0;
     for (int i = ultRow*3; i < ultRow*3 + 3; i++) {
       if (board[i][c] == player) {
@@ -194,7 +202,6 @@ public class TicTacToe
     }
     
     //check horizontal win
-    int ultCol = c / 3;
     int colWins = 0;
     for (int i = ultCol*3; i < ultCol*3 + 3; i++) {
       if (board[r][i] == player) {
