@@ -12,15 +12,14 @@ public class TicTacToe
   int nextRowUB = 8; //upperbound of valid row for next player's move
   int nextColLB = 0; //lowerbound of valid col for next player's move
   int nextColUB = 8; //upperbound of valid col for next player's move
-  int r;
-  int c;
-  int ultRow;
-  int ultCol;
-
+  int r; int c; int ultRow; int ultCol;
+  int numOfFilledSquares = 0;
+  int filledSpots[][] = new int[3][3]; //number of filled spots for each smaller grid
 
   // constructor
-  public TicTacToe()
+  public TicTacToe(Scanner sc)
   {
+    scanner = sc;
     //board
     for (int i = 0; i < 9; i++) {
       for (int j = 0; j < 9; j++) {
@@ -41,72 +40,77 @@ public class TicTacToe
   public void printGameGrid()
   {
     //board
-    System.out.println("  012 345 678");
+    System.out.println("    0 1 2   3 4 5   6 7 8");
     for (int i = 0; i < 9; i++) {
       if (i % 3 == 0) {
-        System.out.println(" -------------");
+        System.out.println("  - - - - - - - - - - - - -");
       }
       for (int j = 0; j < 9; j++) {
         if (j == 0) {
-          System.out.print(i);
+          System.out.print(i + " ");
         }
         if (j % 3 == 0) {
-          System.out.print("|");
+          System.out.print("| ");
         }
-        System.out.print(board[i][j]);
+        System.out.print(board[i][j] + " ");
       }
       System.out.println("|");
     }
-    System.out.println(" -------------");
+    System.out.println("  - - - - - - - - - - - - -");
 
     //ultimate board
     System.out.println("Ultimate Board:");
-    System.out.println("  0 1 2");
-    System.out.println(" -------");
+    System.out.println("- - - - -");
     for (int i = 0; i < 3; i++) {
+      System.out.print("|");
       for (int j = 0; j < 3; j++) {
-        if (j == 0) {
-          System.out.print(i);
-        }
-        System.out.print("|" + ultimateBoard[i][j]);
+        System.out.print(" " + ultimateBoard[i][j]);
       }
-      System.out.println("|");
-      System.out.println(" -------");
+      System.out.println(" |");
     }
+    System.out.println("- - - - -");
   }
 
-  public boolean play(Scanner sc)
+  public boolean play()
   {
-    scanner = sc;
+    //tie when there are no more available squares on ultimate board
+    if (numOfFilledSquares == 9) {
+      System.out.println("Tie!");
+      return true;
+    }
     //input
-    boolean occupied = true;
-    while (occupied) {
+    boolean valid = false;
+    while (!valid) {
      //input for row
-     System.out.println("Player " + playerNum + ", enter a number between " + nextRowLB + " and " + nextRowUB + " to be the row number for your move:");
+     System.out.println("Enter row: ");
      r = -1;
      while (r == -1) {
-       r = validateInput(nextRowLB, nextRowUB);
+       r = validateInput();
      }
+     System.out.println(r);
 
      //input for column
      System.out.println("Player " + playerNum + ", enter a number between " + nextColLB + " and " + nextColUB + " to be the column number for your move:");
      c = -1;
      while (c == -1){
-       c = validateInput(nextColLB, nextColUB);
+       c = validateInput();
      }
+     System.out.println(c);
 
-     if (board[r][c] != ' ') {
-       System.out.println("This spot is already occupied.");
-     }
-     else {
-       occupied = false;
-     }
+     valid = isValidMove(r, c);
     }
-
     playerMove();
     boolean win = checkWin();
     printGameGrid();
     if (win) {
+      nextRowLB = 0; nextRowUB = 8;
+      nextColLB = 0; nextColUB = 8;
+      if (checkUltimateWin() && playerNum == 1) {
+        System.out.println("Congratulations, Player 2! You won!");
+      }
+      else if (checkUltimateWin() && playerNum == 2) {
+        System.out.println("Congratulations, Player 1! You won!");
+      }
       return checkUltimateWin();
     }
     return false;
@@ -122,30 +126,57 @@ public class TicTacToe
       playerNum = 1;
     }
 
-    //update lower and upper bounds for next player's mmove valid row and column
+    //update lower and upper bounds for next player's move valid row and column
     if (ultimateBoard[r % 3][c % 3] == ' ') {
       nextRowLB = (r%3)*3;
       nextRowUB = (r%3)*3+2;
       nextColLB = (c%3)*3;
       nextColUB = (c%3)*3+2;
     }
+    //when the next spot is already filled, player can play anywhere
+    else {
+      nextRowLB = 0; nextRowUB = 8;
+      nextColLB = 0; nextColUB = 8;
+    }
   }
 
-  	public int validateInput (int lowerBound, int upperBound) {
-		String input = scanner.nextLine();
+  public int validateInput() {
+		String input = scanner.next();
 		int n = -1;
 		try {
 			n = Integer.parseInt(input);
-			if (n < lowerBound || n > upperBound) {
-				System.out.println("Please enter an integer between " + lowerBound + " and " + upperBound + " (inclusive).");
-				n = -1;
-			}
+      if (n < 0 || n > 8) {
+        System.out.println("Please enter a number between 0 and 8:");
+        n = -1;
+      }
 		}
 		catch (NumberFormatException e) {
 			System.out.println("Input is invalid. Player " + playerNum + ", enter the row number for your move:");
 		}
 		return n;
 	}
+
+  public boolean isValidMove(int row, int col) {
+    //not in correct square
+    if (!(row >= nextRowLB && row <= nextRowUB &&
+    col >= nextColLB && col <= nextColUB)) {
+      System.out.println("Invalid move. This spot is not in the right ultimate row and column.");
+      return false;
+
+    }
+    //already occupied
+    if (board[r][c] != ' ') {
+       System.out.println("Invalid move. This spot is already occupied.");
+       return false;
+     }
+    //in a square that was already won
+    if (ultimateBoard[row / 3][col / 3] != ' ') {
+      System.out.println("Invalid move. This spot is in a square that has been won already.");
+      return false;
+    }
+    return true;
+  }
+
 
   public boolean checkWin() {
     char player = 'x';
@@ -187,9 +218,18 @@ public class TicTacToe
       }
     }
 
+    //update
+    filledSpots[ultRow][ultCol] = filledSpots[ultRow][ultCol] + 1;
+
     if ((rowWins == 3) || (colWins == 3) || (leftDiagonalWins == 3) || (rightDiagonalWins == 3)) {
       ultimateBoard[ultRow][ultCol] = player;
+      numOfFilledSquares++;
       return true;
+    }
+    if (filledSpots[ultRow][ultCol] == 9) {
+      ultimateBoard[ultRow][ultCol] = 't';
+      numOfFilledSquares++;
+      return true; //tie
     }
     return false;
   }
