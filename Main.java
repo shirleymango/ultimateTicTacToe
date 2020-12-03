@@ -5,20 +5,19 @@ class Main
   public static void main(String[] args) throws FileNotFoundException 
   {
     // print intro
-    System.out.println("Hello! Welcome to Ultimate Tic Tac Toe. Here is the board: ");
-    // Uncomment below to test cases
-    //Scanner sc = new Scanner(new File("winX.dat"));
+    System.out.println("*~*~*~**~*~*~**~*~*~**~*~*~**~*~*~**~*~*~**~*");
+    System.out.println("        WELCOME TO ULTIMATE TIC TAC TOE        ");
+    System.out.println("*~*~*~**~*~*~**~*~*~**~*~*~**~*~*~**~*~*~**~*");
+    System.out.println("Player 1's moves will be recorded with x, and player 2's moves will be recorded with o.");    
 
-    Scanner sc = new Scanner(System.in);
-    TicTacToe t = new TicTacToe();
+    Scanner sc = new Scanner(new File("winX.dat"));
+    TicTacToe t = new TicTacToe(sc);
     t.printGameGrid();
-
-    System.out.println("Player 1's moves will be recorded with x, and player 2's mmoves will be recorded with o.");
 
     boolean gameWon = false;
 
     while (!gameWon) {
-      gameWon = t.play(sc);
+      gameWon = t.play();
     }
   }
 
